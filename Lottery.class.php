@@ -19,7 +19,10 @@ abstract class Lottery {
 		
 		if(0 == count($this->_history_data)) return;
 
-		$this->_predict();
+		$term = 0;
+		if(isset($_GET['term'])) $term = $_GET['term'];
+		$balls = $this->_predict($term);
+		echo implode(',', $balls);
 	}
 
 	abstract protected function _init();
@@ -53,7 +56,8 @@ abstract class Lottery {
 
 	protected function _get_current_data()
 	{
-		return array();
+		if(!isset($_GET['update']))
+			return array();
 
 		$apiurl = sprintf("http://f.opencai.net/utf8/%s-5.json", $this->_code);
 		$data = json_decode(file_get_contents($apiurl), true);
@@ -90,26 +94,32 @@ abstract class Lottery {
 		}
 		unset($_r);
 
+		$set = $this->_set;
 		foreach ($this->_history_data as $t => $result)
 		{
-			if($term && $term >= $t) continue;
+			if($term && $term <= $t) continue;
 
 			$balls = explode(',', $result);
 			
 			foreach ($balls as $k => $ball)
 			{
-				if(in_array($k, $set_indexes)) continue;
-			
 				$ball = intval($ball);
-			
-				if(isset($this->_set[$k][$ball])) unset($this->_set[$k][$ball]);
-
-				if(1 == count($this->_set[$k])) $set_indexes[] = $k;
+				if($k < $set[0]['repeat'])
+				{
+					if(count($set[0]['range']) == $set[0]['repeat']) continue;
+					if(isset($set[0]['range'][$ball])) unset($set[0]['range'][$ball]);
+				}
+				else
+				{
+					if(count($set[1]['range']) == $set[1]['repeat']) continue;
+					if(isset($set[1]['range'][$ball])) unset($set[1]['range'][$ball]);
+				}
 			}
 
-			if(count($set_indexes) == count($this->_set)) break;
+			if(count($set[0]['range']) == $set[0]['repeat'] && 
+				count($set[1]['range']) == $set[1]['repeat']) break;
 		}
 
-		print_r($this->_set);
+		return $set[0]['range'] + $set[1]['range'];
 	}
 }
