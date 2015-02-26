@@ -22,7 +22,7 @@ abstract class Lottery {
 		$term = 0;
 		if(isset($_GET['term'])) $term = $_GET['term'];
 		$balls = $this->_predict($term);
-		echo implode(',', $balls);
+		echo $this->_name . ' : ' . implode(',', $balls) . '<br/>';
 	}
 
 	abstract protected function _init();
@@ -59,7 +59,7 @@ abstract class Lottery {
 		if(!isset($_GET['update']))
 			return array();
 
-		$apiurl = sprintf("http://f.opencai.net/utf8/%s-5.json", $this->_code);
+		$apiurl = sprintf("http://f.opencai.net/utf8/%s-100.json", $this->_code);
 		$data = json_decode(file_get_contents($apiurl), true);
 
 		if(!is_array($data)) return array();
@@ -120,6 +120,7 @@ abstract class Lottery {
 				count($set[1]['range']) == $set[1]['repeat']) break;
 		}
 
-		return $set[0]['range'] + $set[1]['range'];
+		return array_merge($set[0]['range'], $set[1]['range']);
+		return array_values($set[0]['range']) + array_values($set[1]['range']);
 	}
 }

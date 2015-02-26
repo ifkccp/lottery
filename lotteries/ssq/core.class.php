@@ -16,6 +16,6 @@ class Ssq extends Lottery {
 		);
 
 		$this->_name = 'ssq';
-		// $this->_code = 'ssq';
+		$this->_code = 'ssq';
 	}
 }

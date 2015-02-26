@@ -8,7 +8,7 @@ class A {
 
 	public function __contruct(Lottery $core)
 	{
-		print_r($core);
+		// print_r($core);
 	}
 }
 
